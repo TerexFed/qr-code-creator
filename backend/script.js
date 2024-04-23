@@ -40,7 +40,7 @@ app.post('/login', async (req, res) => {
       if (!row) {
         return res.status(404).send('User not found');
       }
-      // Compare the provided password with the hashed password
+
       const validPassword = await bcrypt.compare(req.body.password, row.password);
       if (!validPassword) {
         return res.status(401).send('Invalid password');
