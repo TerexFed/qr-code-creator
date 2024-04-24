@@ -1,15 +1,30 @@
 <template>
   <h1>QR CODE GENERATOR</h1>
-  <h2>Log in</h2>
+  <h2>Sign in</h2>
   <img src="../assets/main-image.svg" alt="" />
 
-  <form>
-    <input type="text" placeholder="Login" />
-    <input type="text" placeholder="Password" />
-    <button>Log in!</button>
+  <form @submit.prevent="login()">
+    <input type="text" placeholder="Login" v-model="username" />
+    <input type="text" placeholder="Password" v-model="password" />
+    <button>Sign in!</button>
   </form>
+
+  <router-button></router-button>
 </template>
-<script setup></script>
+<script setup>
+import routerButton from "@/components/router-button/router-button.vue";
+import axios from "axios";
+
+let username = "";
+let password = "";
+
+function login() {
+  axios.post("http://localhost/3000/login", {
+    username: username,
+    password: password,
+  });
+}
+</script>
 <style scoped>
 img {
   margin-top: 33px;
