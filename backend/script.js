@@ -1,75 +1,91 @@
-const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+// Import required modules
+const express = require("express");
+const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
+const bcrypt = require("bcryptjs");
+const cors = require("cors");
+const jwt = require("jsonwebtoken");
 
-
+// Initialize Express app
 const app = express();
-app.use(express.json());
-
-const db = new sqlite3.Database(':memory:');
 
 
-db.serialize(() => {
-  db.run('CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)');
+app.use(cors());
+
+app.use(bodyParser.json());
+
+
+mongoose
+  .connect(
+    "mongodb+srv://terexfed9:Gh9X26LAtrBYwKwx@cluster.czv7iii.mongodb.net/",
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }
+  )
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.log(err));
+
+
+const UserSchema = new mongoose.Schema({
+  username: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  password: {
+    type: String,
+    required: true,
+  },
 });
 
-app.post('/register', async (req, res) => {
+
+const User = mongoose.model("User", UserSchema);
+
+app.post("/register", async (req, res) => {
+  const { username, password } = req.body;
+
   try {
 
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.status(400).json({ message: "Username already exists" });
+    }
 
-    db.run('INSERT INTO users (username, password) VALUES (?, ?)', [req.body.username, hashedPassword], (err) => {
-      if (err) {
-        return res.status(500).send('Error registering user');
-      }
-      res.status(201).send('User registered successfully');
-    });
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new User({ username, password: hashedPassword });
+    await newUser.save();
+
+    res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
-    res.status(500).send('Error registering user');
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-app.post('/login', async (req, res) => {
+app.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+
   try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid username or password" });
+    }
 
-    db.get('SELECT * FROM users WHERE username = ?', [req.body.username], async (err, row) => {
-      if (err) {
-        return res.status(500).send('Error logging in');
-      }
-      if (!row) {
-        return res.status(404).send('User not found');
-      }
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: "Invalid username or password" });
+    }
 
-      const validPassword = await bcrypt.compare(req.body.password, row.password);
-      if (!validPassword) {
-        return res.status(401).send('Invalid password');
-      }
+    const token = jwt.sign({ userId: user._id }, 'cPL7gPPldiKIYRQzGUpWgQvevWYDCmbZOqoCanQ5csx1D-NicKXcGTDefEkJkPCL', { expiresIn: '1h' });
 
-      const token = jwt.sign({ userId: row.id }, 'cPL7gPPldiKIYRQzGUpWgQvevWYDCmbZOqoCanQ5csx1D-NicKXcGTDefEkJkPCL');
-      res.status(200).json({ token });
-    });
+    res.status(200).json({ message: "Login successful", token });
   } catch (error) {
-    res.status(500).send('Error logging in');
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-
-// function verifyToken(req, res, next) {
-//   const token = req.headers['authorization'];
-//   if (!token) {
-//     return res.status(401).send('Access denied. Token is required');
-//   }
-//   try {
-//     const decoded = jwt.verify(token, 'cPL7gPPldiKIYRQzGUpWgQvevWYDCmbZOqoCanQ5csx1D-NicKXcGTDefEkJkPCL');
-//     req.userId = decoded.userId;
-//     next();
-//   } catch (error) {
-//     res.status(401).send('Invalid token');
-//   }
-// }
-
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

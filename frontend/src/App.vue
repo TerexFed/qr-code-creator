@@ -3,7 +3,7 @@
 </template>
 <script setup></script>
 <style>
-:root{
+:root {
   --text-primary-color: rgb(0, 0, 0);
 }
 * {
@@ -11,14 +11,11 @@
   padding: 0;
   box-sizing: border-box;
 }
-#app {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
 body {
   background: rgb(194, 190, 190);
+}
+#app {
+  height: 100vh;
 }
 h1 {
   color: var(--text-primary-color);
@@ -38,13 +35,25 @@ h2 {
   letter-spacing: 0px;
   margin-top: 33px;
 }
-input{
-  width: 20vw;
+input {
+  width: 350px;
   height: 40px;
   border: none;
   border-radius: 5px;
   outline: none;
   padding-left: 15px;
 }
-
+select {
+  width: 350px;
+  height: 40px;
+  border: none;
+  border-radius: 5px;
+  outline: none;
+  padding-left: 15px;
+  font-size: 18px;
+}
+select::after{
+  content: '';
+  background: url('./assets/select-arrow.svg');
+}
 </style>

@@ -1,17 +1,20 @@
 <template>
-  <h1>QR CODE GENERATOR</h1>
-  <h2>Sign in</h2>
-  <img src="../assets/main-image.svg" alt="" />
+  <div class="login">
+    <h1>QR CODE GENERATOR</h1>
+    <h2>Sign in</h2>
+    <img src="../assets/main-image.svg" alt="" />
 
-  <form @submit.prevent="login()">
-    <input type="text" placeholder="Login" v-model="username" />
-    <input type="text" placeholder="Password" v-model="password" />
-    <button>Sign in!</button>
-  </form>
+    <form @submit.prevent="login()">
+      <input type="text" placeholder="Login" v-model="username" />
+      <input type="text" placeholder="Password" v-model="password" />
+      <button>Sign in!</button>
+    </form>
 
-  <router-button></router-button>
+    <router-button></router-button>
+  </div>
 </template>
 <script setup>
+import router from "@/router";
 import routerButton from "@/components/router-button/router-button.vue";
 import axios from "axios";
 
@@ -19,13 +22,31 @@ let username = "";
 let password = "";
 
 function login() {
-  axios.post("http://localhost/3000/login", {
-    username: username,
-    password: password,
-  });
+  axios
+    .post(
+      "http://localhost:3000/login",
+      {
+        username: username,
+        password: password,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          "X-Powered-By": "Express",
+        },
+      }
+    )
+    .then((data) => localStorage.setItem("token", data.data.token))
+    .finally(router.push("/qr-code-creator"));
 }
 </script>
 <style scoped>
+.login {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
 img {
   margin-top: 33px;
 }

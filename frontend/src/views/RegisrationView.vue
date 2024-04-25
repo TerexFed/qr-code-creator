@@ -1,15 +1,17 @@
 <template>
-  <h1>QR CODE GENERATOR</h1>
-  <h2>Sign up</h2>
-  <img src="../assets/main-image.svg" alt="" />
+  <div class="registration">
+    <h1>QR CODE GENERATOR</h1>
+    <h2>Sign up</h2>
+    <img src="../assets/main-image.svg" alt="" />
 
-  <form @submit.prevent="register()">
-    <input type="text" placeholder="Login" v-model="username" />
-    <input type="text" placeholder="Password" v-model="password" />
-    <button>Sign up!</button>
-  </form>
+    <form @submit.prevent="register()">
+      <input type="text" placeholder="Login" v-model="username" />
+      <input type="text" placeholder="Password" v-model="password" />
+      <button>Sign up!</button>
+    </form>
 
-  <router-button></router-button>
+    <router-button></router-button>
+  </div>
 </template>
 <script setup>
 import routerButton from "@/components/router-button/router-button.vue";
@@ -20,16 +22,27 @@ let password = "";
 
 function register() {
   axios.post(
-    "http://localhost/3000/register",
+    "http://localhost:3000/register",
     {
       username: username,
       password: password,
     },
-    {maxBodyLength: 132}
+    {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        "X-Powered-By": "Express",
+      },
+    }
   );
 }
 </script>
 <style scoped>
+.registration {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
 img {
   margin-top: 33px;
 }
