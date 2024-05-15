@@ -8,6 +8,7 @@
       <input type="text" placeholder="Login" v-model="username" />
       <input type="text" placeholder="Password" v-model="password" />
       <button>Sign in!</button>
+      <label v-if="errorMsg !== ''">{{ errorMsg }}</label>
     </form>
 
     <router-button></router-button>
@@ -17,9 +18,11 @@
 import router from "@/router";
 import routerButton from "@/components/router-button/router-button.vue";
 import axios from "axios";
+import { ref } from "vue";
 
 let username = "";
 let password = "";
+let errorMsg = ref('');
 
 function login() {
   axios
@@ -36,8 +39,19 @@ function login() {
         },
       }
     )
-    .then((data) => localStorage.setItem("token", data.data.token))
-    .finally(router.push("/qr-code-creator"));
+    .then((response) => {
+      const token = response.data.token;
+      localStorage.setItem("token", token);
+      if (token) {
+        router.push('/qr-code-creator');
+      } else {
+        router.push('/login');
+      }
+    })
+    .catch(error => {
+      console.error("Login failed:", error);
+      errorMsg.value = error.response.data.message
+    });
 }
 </script>
 <style scoped>
@@ -69,5 +83,9 @@ button {
   font-weight: 400;
   line-height: 17px;
   letter-spacing: 0px;
+}
+label {
+  text-align: center;
+  color: rgb(43, 0, 255);
 }
 </style>

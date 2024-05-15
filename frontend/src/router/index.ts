@@ -4,6 +4,7 @@ import RegisrationView from '@/views/RegisrationView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 
+
 const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -21,7 +22,15 @@ const router = createRouter({
     },
     {
       path: '/qr-code-creator',
-      component: QrCodeCreateView
+      component: QrCodeCreateView,
+      beforeEnter: (to, from, next) => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          next('/login');
+        } else {
+          next();
+        }
+      }
     }
   ],
 })

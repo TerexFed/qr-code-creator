@@ -1,4 +1,4 @@
-// Import required modules
+
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
@@ -6,7 +6,6 @@ const bcrypt = require("bcryptjs");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 
-// Initialize Express app
 const app = express();
 
 
@@ -17,7 +16,7 @@ app.use(bodyParser.json());
 
 mongoose
   .connect(
-    "mongodb+srv://terexfed9:Gh9X26LAtrBYwKwx@cluster.czv7iii.mongodb.net/",
+    "mongodb+srv://terexfed9:Gh9X26LAtrBYwKwx@cluster.czv7iii.mongodb.net/?retryWrites=true&w=majority&appName=Cluster",
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,
