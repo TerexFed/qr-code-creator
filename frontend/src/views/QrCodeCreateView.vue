@@ -5,17 +5,23 @@
         <h1>QR CODE GENERATOR</h1>
         <img src="../assets/main-image.svg" alt="top-qr-code" />
       </div>
-      <RouterLink class="back-to-login" @click="logout()" to="/login">Log out</RouterLink>
+      <RouterLink class="back-to-login" @click="logout()" to="/login"
+        >Log out</RouterLink
+      >
     </div>
     <div class="main">
       <div class="qr-code-show">
-        <img :src="qrCode" alt="" title="" />
-        <input 
-          :type="getInputType()" 
-          :accept="getInputType() === 'file' ? 'image/png, image/jpeg' : ''" 
-          :placeholder="inputPlaceholder" 
-          v-model="inputVal"
+        <div class="qr-code-template">
+          <img v-if="qrCode" :src="qrCode" alt="" title="" />
+        </div>
+        <input
+        :type="getInputType()"
+        :accept="getInputType() === 'file' ? 'image/png, image/jpeg' : ''"
+        :placeholder="inputPlaceholder"
+        v-model="inputVal"
         />
+        <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+        <button class="button-create" @click="generateQRCode">Generate QR Code</button>
       </div>
       <div class="choise">
         <label>What do you want do paste in qr code?</label>
@@ -24,7 +30,6 @@
           <option value="website link">Website link</option>
           <option value="image">Image</option>
           <option value="text">Browser search</option>
-          <option value="SMS">SMS</option>
         </select>
       </div>
     </div>
@@ -35,35 +40,61 @@ import { ref, watch } from "vue";
 import { RouterLink } from "vue-router";
 
 let select = ref("email");
-let inputVal = ref("")
+let inputVal = ref("");
+let errorMessage = ref("");
 
 watch(select, (newValue) => {
   inputPlaceholder.value = `Type your ${newValue} here`;
-  qrCode.value = ''
-});
-watch(inputVal, (newValue) => {
-  qrCode.value = `https://api.qrserver.com/v1/create-qr-code/?data=${newValue}&amp;size=100x100`;
+  qrCode.value = "";
+  errorMessage.value = "";
+  inputVal.value = "";
 });
 
 const inputPlaceholder = ref(`Type your ${select.value} here`);
-const qrCode = ref(`https://api.qrserver.com/v1/create-qr-code/?data=${inputVal.value}&amp;size=100x100`)
+const qrCode = ref("");
 
-function getInputType(){
-  if (select.value === 'email'){
-    return 'email'
+function getInputType() {
+  if (select.value === "email") {
+    return "email";
+  } else if (select.value === "image") {
+    return "file";
+  } else {
+    return "text";
   }
-  else if (select.value === 'image'){
-    return 'file'
+}
+
+function validateInput() {
+  if (inputVal.value.trim() === "") {
+    errorMessage.value = "Input cannot be empty";
+    return false;
   }
-  else {
-    return 'text'
+  if (select.value === "email") {
+    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!emailPattern.test(inputVal.value)) {
+      errorMessage.value = "Please enter a valid email address";
+      return false;
+    }
+  } else if (select.value === "website link") {
+    try {
+      new URL(inputVal.value);
+    } catch (_) {
+      errorMessage.value = "Please enter a valid URL";
+      return false;
+    }
+  }
+  errorMessage.value = "";
+  return true;
+}
+
+function generateQRCode() {
+  if (validateInput()) {
+    qrCode.value = `https://api.qrserver.com/v1/create-qr-code/?data=${inputVal.value}&size=250x250`;
   }
 }
 
 function logout() {
   localStorage.removeItem("token");
 }
-
 </script>
 <style scoped>
 h1 {
@@ -73,6 +104,7 @@ h1 {
 .header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   height: 80px;
   background-color: #c4c4c4;
   padding: 0 20px 0 20px;
@@ -97,7 +129,6 @@ img[alt="top-qr-code"] {
   font-weight: 400;
   line-height: 22px;
   letter-spacing: 0px;
-  margin-top: 33px;
   text-decoration: none;
 }
 
@@ -111,7 +142,7 @@ img[alt="top-qr-code"] {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-top: 100px;
+  margin-top: 50px;
 }
 
 input {
@@ -121,7 +152,8 @@ input {
 .choise {
   display: flex;
   flex-direction: column;
-  margin-top: 70px;
+  align-items: center;
+  margin-top: 20px;
 }
 
 label {
@@ -131,12 +163,60 @@ label {
   font-weight: 400;
   line-height: 15px;
   letter-spacing: 0px;
-  padding: 0 0 5px 15px
+  padding: 0 0 5px 15px;
 }
 
 .qr-code-show {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+.qr-code-template {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 15px;
+  width: 280px;
+  height: 280px;
+  background-color: white;
+  margin-bottom: 20px;
+}
+
+.error{
+  color: rgb(43, 0, 255);
+  margin-top: 10px;
+}
+
+.button-create{
+  font-size: 20px;
+  padding: 10px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: white;
+  cursor: pointer;
+  box-shadow: 0px 10px 0px rgb(0, 0, 0);
+}
+.button-create:hover{
+  transition: 0.4s;
+  box-shadow: 0px 0px 0px transparent;
+}
+
+@media (max-width: 525px) {
+  img[alt="top-qr-code"]{
+    display: none;
+  }
+  h1{
+    font-size: 18px;
+  }
+  a.back-to-login{
+    font-size: 15px;
+  }
+  input, select{
+    width: 80vw;
+  }
+  label{
+    font-size: 14px;
+  }
 }
 </style>
