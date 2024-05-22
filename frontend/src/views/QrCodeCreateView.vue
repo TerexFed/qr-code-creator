@@ -2,7 +2,11 @@
   <div class="qr-code-creator">
     <div class="header">
       <div class="header-text">
-        <h1>QR CODE GENERATOR</h1>
+        <div class="navigation">
+          <RouterLink class="navigation-link" to="/qr-code-creator">QR CODE GENERATOR</RouterLink>
+          <div class="line"></div>
+          <RouterLink class="navigation-link" to="/qr-code-created">CREATED QR CODES</RouterLink>
+        </div>
         <img src="../assets/main-image.svg" alt="top-qr-code" />
       </div>
       <RouterLink class="back-to-login" @click="logout()" to="/login"
@@ -15,13 +19,15 @@
           <img v-if="qrCode" :src="qrCode" alt="" title="" />
         </div>
         <input
-        :type="getInputType()"
-        :accept="getInputType() === 'file' ? 'image/png, image/jpeg' : ''"
-        :placeholder="inputPlaceholder"
-        v-model="inputVal"
+          :type="getInputType()"
+          :accept="getInputType() === 'file' ? 'image/png, image/jpeg' : ''"
+          :placeholder="inputPlaceholder"
+          v-model="inputVal"
         />
         <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-        <button class="button-create" @click="generateQRCode">Generate QR Code</button>
+        <button class="button-create" @click="generateQRCode">
+          Generate QR Code
+        </button>
       </div>
       <div class="choise">
         <label>What do you want do paste in qr code?</label>
@@ -38,6 +44,7 @@
 <script setup>
 import { ref, watch } from "vue";
 import { RouterLink } from "vue-router";
+import axios from "axios";
 
 let select = ref("email");
 let inputVal = ref("");
@@ -86,9 +93,25 @@ function validateInput() {
   return true;
 }
 
-function generateQRCode() {
+async function generateQRCode() {
   if (validateInput()) {
-    qrCode.value = `https://api.qrserver.com/v1/create-qr-code/?data=${inputVal.value}&size=250x250`;
+    const token = localStorage.getItem('token');
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${inputVal.value}&size=250x250`;
+    qrCode.value = qrCodeUrl;
+
+    try {
+      await axios.post('http://localhost:3000/qr-codes', {
+        data: qrCodeUrl,
+        title: inputVal.value
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+    } catch (error) {
+      console.error('Failed to save QR code:', error);
+    }
   }
 }
 
@@ -117,6 +140,30 @@ h1 {
   width: fit-content;
 }
 
+.navigation{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.navigation-link{
+  color: var(--text-primary-color);
+  font-family: JejuGothic;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 22px;
+  letter-spacing: 0px;
+  text-decoration: none;
+  text-align: center;
+}
+
+.line{
+  width: auto;
+  height: 1px;
+  margin: 5px 0 5px 0;
+  background-color: black;
+}
+
 img[alt="top-qr-code"] {
   opacity: 0.5;
   padding-left: 27px;
@@ -132,7 +179,7 @@ img[alt="top-qr-code"] {
   text-decoration: none;
 }
 
-.back-to-login:hover {
+.back-to-login:hover, .navigation-link:hover {
   color: white;
   transition: 0.2s;
 }
@@ -142,7 +189,7 @@ img[alt="top-qr-code"] {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-top: 50px;
+  margin-top: 25px;
 }
 
 input {
@@ -182,12 +229,12 @@ label {
   margin-bottom: 20px;
 }
 
-.error{
+.error {
   color: rgb(43, 0, 255);
   margin-top: 10px;
 }
 
-.button-create{
+.button-create {
   font-size: 20px;
   padding: 10px;
   margin-top: 10px;
@@ -197,25 +244,23 @@ label {
   cursor: pointer;
   box-shadow: 0px 10px 0px rgb(0, 0, 0);
 }
-.button-create:hover{
+.button-create:hover {
   transition: 0.4s;
   box-shadow: 0px 0px 0px transparent;
 }
 
-@media (max-width: 525px) {
-  img[alt="top-qr-code"]{
+@media (max-width: 500px) {
+  img[alt="top-qr-code"] {
     display: none;
   }
-  h1{
-    font-size: 18px;
-  }
-  a.back-to-login{
+  a.back-to-login, a.navigation-link {
     font-size: 15px;
   }
-  input, select{
+  input,
+  select {
     width: 80vw;
   }
-  label{
+  label {
     font-size: 14px;
   }
 }
