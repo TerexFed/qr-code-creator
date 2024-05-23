@@ -18,7 +18,7 @@
       >
     </div>
     <div class="qr-codes">
-      <div v-if="qrCodes.length === 0">No QR Codes created yet.</div>
+      <div class="no-qr-codes" v-if="qrCodes.length === 0"><h1>No QR Codes created yet</h1></div>
       <div class="created-qr-codes" v-else>
         <div v-for="qrCode in qrCodes" :key="qrCode._id" class="qr-code-item">
           <img :src="qrCode.data" alt="QR-Code" />
@@ -135,6 +135,12 @@ img[alt="top-qr-code"] {
   margin-top: 25px;
 }
 
+.no-qr-codes{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .qr-code-item {
   display: flex;
   flex-direction: column;
@@ -143,7 +149,7 @@ img[alt="top-qr-code"] {
   border-radius: 15px;
   margin: 5px;
   padding: 10px;
-  width: 320px;
+  width: 300px;
   height: fit-content;
 }
 .qr-code-item img {
@@ -153,7 +159,10 @@ img[alt="top-qr-code"] {
 }
 .qr-code-text{
   font-size: 20px;
+  width: 250px;
   margin: 10px 10px;
+  word-wrap: break-word;
+  text-align: center;
 }
 .qr-code-item button{
   cursor: pointer;

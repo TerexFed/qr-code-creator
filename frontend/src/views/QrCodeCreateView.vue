@@ -3,9 +3,13 @@
     <div class="header">
       <div class="header-text">
         <div class="navigation">
-          <RouterLink class="navigation-link" to="/qr-code-creator">QR CODE GENERATOR</RouterLink>
+          <RouterLink class="navigation-link" to="/qr-code-creator"
+            >QR CODE GENERATOR</RouterLink
+          >
           <div class="line"></div>
-          <RouterLink class="navigation-link" to="/qr-code-created">CREATED QR CODES</RouterLink>
+          <RouterLink class="navigation-link" to="/qr-code-created"
+            >CREATED QR CODES</RouterLink
+          >
         </div>
         <img src="../assets/main-image.svg" alt="top-qr-code" />
       </div>
@@ -18,12 +22,14 @@
         <div class="qr-code-template">
           <img v-if="qrCode" :src="qrCode" alt="" title="" />
         </div>
-        <input
-          :type="getInputType()"
-          :accept="getInputType() === 'file' ? 'image/png, image/jpeg' : ''"
-          :placeholder="inputPlaceholder"
-          v-model="inputVal"
-        />
+        <div class="input-layout">
+          <input
+            :type="getInputType()"
+            :placeholder="inputPlaceholder"
+            v-model="inputVal"
+          />
+          <button @click="inputVal = ''" class="input-clear">Clear</button>
+        </div>
         <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
         <button class="button-create" @click="generateQRCode">
           Generate QR Code
@@ -34,6 +40,7 @@
         <select v-model="select">
           <option selected value="email">Email</option>
           <option value="website link">Website link</option>
+          <option value="telephone">Telephone</option>
           <option value="image">Image</option>
           <option value="text">Browser search</option>
         </select>
@@ -63,8 +70,8 @@ const qrCode = ref("");
 function getInputType() {
   if (select.value === "email") {
     return "email";
-  } else if (select.value === "image") {
-    return "file";
+  } else if (select.value === "telephone") {
+    return "tel";
   } else {
     return "text";
   }
@@ -76,8 +83,8 @@ function validateInput() {
     return false;
   }
   if (select.value === "email") {
-    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    if (!emailPattern.test(inputVal.value)) {
+    const pattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!pattern.test(inputVal.value)) {
       errorMessage.value = "Please enter a valid email address";
       return false;
     }
@@ -88,6 +95,19 @@ function validateInput() {
       errorMessage.value = "Please enter a valid URL";
       return false;
     }
+  } else if (select.value === "telephone") {
+    // eslint-disable-next-line no-useless-escape
+    const pattern = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
+    if (!pattern.test(inputVal.value)) {
+      errorMessage.value = "Please enter a valid telephone number";
+      return false;
+    }
+  } else if (select.value === "image") {
+    const pattern = /[^\s]+(.*?).(jpg|jpeg|png|gif|JPG|JPEG|PNG|GIF)$/;
+    if (!pattern.test(inputVal.value)) {
+      errorMessage.value = "Please enter a valid link for an image";
+      return false;
+    }
   }
   errorMessage.value = "";
   return true;
@@ -95,22 +115,32 @@ function validateInput() {
 
 async function generateQRCode() {
   if (validateInput()) {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${inputVal.value}&size=250x250`;
     qrCode.value = qrCodeUrl;
 
     try {
-      await axios.post('http://localhost:3000/qr-codes', {
-        data: qrCodeUrl,
-        title: inputVal.value
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
+      await axios.post(
+        "http://localhost:3000/qr-codes",
+        {
+          data: qrCodeUrl,
+          title:
+            inputVal.value.toLocaleLowerCase().endsWith("png") ||
+            inputVal.value.toLocaleLowerCase().startsWith("jpeg")
+              ? "Image"
+              : inputVal.value.toLocaleLowerCase().endsWith("gif")
+              ? "GIF"
+              : inputVal.value,
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
     } catch (error) {
-      console.error('Failed to save QR code:', error);
+      console.error("Failed to save QR code:", error);
     }
   }
 }
@@ -140,13 +170,13 @@ h1 {
   width: fit-content;
 }
 
-.navigation{
+.navigation {
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-.navigation-link{
+.navigation-link {
   color: var(--text-primary-color);
   font-family: JejuGothic;
   font-size: 20px;
@@ -157,7 +187,7 @@ h1 {
   text-align: center;
 }
 
-.line{
+.line {
   width: auto;
   height: 1px;
   margin: 5px 0 5px 0;
@@ -179,7 +209,8 @@ img[alt="top-qr-code"] {
   text-decoration: none;
 }
 
-.back-to-login:hover, .navigation-link:hover {
+.back-to-login:hover,
+.navigation-link:hover {
   color: white;
   transition: 0.2s;
 }
@@ -192,8 +223,25 @@ img[alt="top-qr-code"] {
   margin-top: 25px;
 }
 
-input {
+.input-layout {
+  display: flex;
+  align-items: center;
+}
+
+.input-clear {
+  cursor: pointer;
+  height: 40px;
+  background-color: white;
+  border: none;
+  border-radius: 0 5px 5px 0;
+  padding: 10px;
   font-size: 16px;
+  border-left: 1px solid black;
+}
+
+.input-clear:active {
+  transition: 0.2s;
+  transform: translate(-3px);
 }
 
 .choise {
@@ -253,7 +301,8 @@ label {
   img[alt="top-qr-code"] {
     display: none;
   }
-  a.back-to-login, a.navigation-link {
+  a.back-to-login,
+  a.navigation-link {
     font-size: 15px;
   }
   input,

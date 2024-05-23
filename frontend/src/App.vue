@@ -39,7 +39,8 @@ input {
   width: 350px;
   height: 40px;
   border: none;
-  border-radius: 5px;
+  font-size: 16px;
+  border-radius: 5px 0 0 5px;
   outline: none;
   padding-left: 15px;
 }
