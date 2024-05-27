@@ -50,12 +50,23 @@
 </template>
 <script setup>
 import { ref, watch } from "vue";
-import { RouterLink } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 import axios from "axios";
 
+const router = useRouter()
 let select = ref("email");
 let inputVal = ref("");
 let errorMessage = ref("");
+
+function logout() {
+  localStorage.removeItem("token");
+}
+
+const token = localStorage.getItem("token");
+if (!token.match(/^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/)) {
+  logout();
+  router.push('/login')
+}
 
 watch(select, (newValue) => {
   inputPlaceholder.value = `Type your ${newValue} here`;
@@ -143,10 +154,6 @@ async function generateQRCode() {
       console.error("Failed to save QR code:", error);
     }
   }
-}
-
-function logout() {
-  localStorage.removeItem("token");
 }
 </script>
 <style scoped>

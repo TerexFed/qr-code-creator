@@ -31,9 +31,17 @@
 </template>
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router'
 import axios from 'axios';
 
 const qrCodes = ref([]);
+const router = useRouter()
+
+const token = localStorage.getItem("token");
+if (!token.match(/^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/)) {
+  localStorage.removeItem("token");
+  router.push('/login')
+}
 
 onMounted(async () => {
   const token = localStorage.getItem('token');
