@@ -14,8 +14,13 @@
   </div>
 </template>
 <script setup>
+import { defineComponent } from "vue";
 import routerButton from "@/components/router-button/router-button.vue";
 import axios from "axios";
+
+export default defineComponent({
+  name: "RegistrationView",
+});
 
 let username = "";
 let password = "";

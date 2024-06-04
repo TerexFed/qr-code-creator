@@ -1,6 +1,10 @@
+// @ts-ignore
 import AuthView from '@/views/AuthView.vue'
+// @ts-ignore
 import CreatedQrCodes from '@/views/CreatedQrCodes.vue'
+// @ts-ignore
 import QrCodeCreateView from '@/views/QrCodeCreateView.vue'
+// @ts-ignore
 import RegisrationView from '@/views/RegisrationView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
