@@ -132,7 +132,7 @@ async function generateQRCode() {
 
     try {
       await axios.post(
-        "http://localhost:3000/qr-codes",
+        "https://qr-code-creator.onrender.com/qr-codes",
         {
           data: qrCodeUrl,
           title:

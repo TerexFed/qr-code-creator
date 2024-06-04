@@ -46,7 +46,7 @@ if (!token.match(/^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/)) {
 onMounted(async () => {
   const token = localStorage.getItem('token');
   try {
-    const response = await axios.get('http://localhost:3000/qr-codes', {
+    const response = await axios.get('https://qr-code-creator.onrender.com/qr-codes', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -61,7 +61,7 @@ async function deleteQrCode(qrCodeId) {
   const token = localStorage.getItem('token'); 
 
   try {
-    const response = await axios.delete(`http://localhost:3000/qr-codes/${qrCodeId}`, {
+    const response = await axios.delete(`https://qr-code-creator.onrender.com/qr-codes/${qrCodeId}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }

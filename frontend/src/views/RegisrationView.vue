@@ -22,7 +22,7 @@ let password = "";
 
 function register() {
   axios.post(
-    "http://localhost:3000/register",
+    "https://qr-code-creator.onrender.com/register",
     {
       username: username,
       password: password,

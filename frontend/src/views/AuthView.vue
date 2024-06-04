@@ -27,7 +27,7 @@ let errorMsg = ref('');
 function login() {
   axios
     .post(
-      "http://localhost:3000/login",
+      "https://qr-code-creator.onrender.com/login",
       {
         username: username,
         password: password,
